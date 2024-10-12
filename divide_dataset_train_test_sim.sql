@@ -1,0 +1,40 @@
+CREATE TABLE "TRAIN_TEST_SIM_DATASET" AS
+WITH RANKED_USERS AS (
+    SELECT *, 
+           ROW_NUMBER() OVER (PARTITION BY "Exited" ORDER BY RANDOM()) AS RN  
+    FROM "CHURN_DATASET"
+),
+TOTAL_COUNTS AS (
+    SELECT 
+        COUNT(*) AS TOTAL_COUNT,
+        COUNT(CASE WHEN "Exited" = TRUE THEN 1 END) AS COUNT_EXITED_1,
+        COUNT(CASE WHEN "Exited" = FALSE THEN 1 END) AS COUNT_EXITED_0
+    FROM RANKED_USERS
+)
+SELECT *,
+  CASE
+    WHEN RN <= (SELECT COUNT_EXITED_1 FROM TOTAL_COUNTS) / 2 AND "Exited" = TRUE THEN 'Train_Test'
+    WHEN RN > (SELECT COUNT_EXITED_1 FROM TOTAL_COUNTS) / 2 AND "Exited" = TRUE THEN 'Simulation'
+    WHEN RN <= (SELECT COUNT_EXITED_0 FROM TOTAL_COUNTS) / 2 AND "Exited" = FALSE THEN 'Train_Test'
+    WHEN RN > (SELECT COUNT_EXITED_0 FROM TOTAL_COUNTS) / 2 AND "Exited" = FALSE THEN 'Simulation'
+  END AS DATASET_TYPE 
+FROM RANKED_USERS;
+
+SELECT DATASET_TYPE, "Exited", COUNT(*)
+FROM "TRAIN_TEST_SIM_DATASET"
+GROUP BY DATASET_TYPE, "Exited";
+
+CREATE TABLE "CHURN_TRAIN_TEST_DATASET" AS
+SELECT 
+  "RowNumber", "CustomerId", "Surname", "Age", "EstimatedSalary", "Balance","CreditScore", "NumOfProducts", "Geography", "Gender", "HasCrCard", "IsActiveMember", "Exited"
+FROM "TRAIN_TEST_SIM_DATASET"
+where DATASET_TYPE = 'Train_Test'
+
+CREATE TABLE "USER_SIM_DATASET" AS
+SELECT 
+  "RowNumber", "CustomerId", "Surname", "Age", "EstimatedSalary", "Balance","CreditScore", "NumOfProducts", "Geography", "Gender", "HasCrCard", "IsActiveMember", "Exited"
+FROM "TRAIN_TEST_SIM_DATASET"
+where DATASET_TYPE = 'Simulation'
+
+SELECT COUNT(*) FROM "CHURN_TRAIN_TEST_DATASET";
+SELECT COUNT(*) FROM "USER_SIM_DATASET";
