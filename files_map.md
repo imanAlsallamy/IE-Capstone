@@ -9,6 +9,6 @@
 ├── **eda.ipynb**: Used to explore and understand the dataset with no manipulation done  
 ├── **preprocessing.py**: Data engineering and prepare the data for the model  
 ├── **training.py**: This file used to train our models and save it in pickles  
-├── **predict.py**: This file used to predict the probabilities of both exited (0, 1) on the simulation data  
+├── **predict.py**: This file used to predict the probabilities of exited, & not exited on the simulation data  
 ├── **used-models.py**: Contains the models we explored
 └── **main.ipynb**: Main notebook to run the entire project  

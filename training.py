@@ -14,9 +14,12 @@ def split_data(X, y, test_size=0.3, random_state=42):
 def train_models(models, X_train, X_test, y_train):
     y_preds = []
     trained_models = []
+    
     for model in models:
-        trained_models.append(model.fit(X_train, y_train))
-        y_preds.append(model.predict(X_test))
+        trained_model = model.fit(X_train, y_train)
+        trained_models.append(trained_model)
+        y_preds.append(trained_model.predict(X_test))
+
     return trained_models, y_preds
 
 def evaluate_models(models_names, y_test, y_preds):
